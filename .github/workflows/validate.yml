@@ -1,0 +1,48 @@
+name: validate
+
+# Runs the repo's deterministic content validator against a PR's changes.
+#
+# SECURITY: this uses pull_request_target (so first-time contributors don't
+# need "approve and run") but stays safe by checking out the BASE branch's
+# scripts/validate.sh — never the PR's own copy — and only overlaying the
+# PR's content directories on top of it. A PR can never smuggle a malicious
+# validator or silence its own check by editing scripts/validate.sh.
+#
+# INVARIANT: validate.sh must only READ the overlaid content, never execute
+# it (see the hardening rule at the top of scripts/validate.sh). If you need
+# to run the PR's code (tests, linters that execute code), do it in a
+# separate `pull_request`-triggered workflow with no secrets — not here.
+#
+# CONTENT_DIRS below is a placeholder — point it at whatever directories
+# your project's validate.sh actually checks.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+env:
+  CONTENT_DIRS: "example"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch (trusted scripts)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Overlay PR content directories only
+        run: |
+          set -uo pipefail
+          git fetch origin "pull/${{ github.event.pull_request.number }}/head" --depth=1
+          for d in $CONTENT_DIRS; do
+            [ -d "$d" ] || continue
+            git checkout FETCH_HEAD -- "$d" || true
+          done
+
+      - name: Run validate.sh (trusted, from base branch)
+        run: ./scripts/validate.sh $CONTENT_DIRS

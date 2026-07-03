@@ -1,0 +1,11 @@
+# Replace the placeholder below with your real team or maintainer handles.
+#
+# The orchestration engine and CI are governance surfaces: changes to them
+# alter how work is claimed, reviewed, and merged. Route them to humans.
+
+*                       @YOUR-ORG/maintainers
+
+# Governance-critical paths — require the platform owners specifically.
+/scripts/               @YOUR-ORG/platform-owners
+/.github/workflows/     @YOUR-ORG/platform-owners
+/.github/trusted-reviewers.json  @YOUR-ORG/platform-owners

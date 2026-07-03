@@ -1,0 +1,24 @@
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+.env
+.env.*
+*.local
+
+node_modules/
+__pycache__/
+*.pyc
+dist/
+build/
+
+# transient agent-workflow files
+.aw-review.md
+.aw-followups.json
+
+# operational state: audit trail, runner logs
+.aw/
+
+# operator-local config (may contain tokens) — aw.conf (team defaults) IS committed
+aw.conf.local
