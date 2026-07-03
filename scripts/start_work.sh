@@ -12,11 +12,11 @@
 #      AW_REPO REPO_DIR
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="start_work"
+export SCRIPT_NAME="start_work"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
-RUNS_AGENT=1
+export RUNS_AGENT=1
 preflight
 acquire_instance_lock "$SCRIPT_NAME"
 trap 'release_instance_lock' EXIT

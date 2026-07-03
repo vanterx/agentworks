@@ -9,7 +9,7 @@
 # queue depths from GitHub. No writes anywhere.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="metrics"
+export SCRIPT_NAME="metrics"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 

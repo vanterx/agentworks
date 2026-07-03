@@ -15,7 +15,7 @@
 # placeholder since the real path is a per-run mktemp.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="render_prompt"
+export SCRIPT_NAME="render_prompt"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 

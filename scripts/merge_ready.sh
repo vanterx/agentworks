@@ -20,7 +20,7 @@
 # AW_REQUIRED_APPROVALS.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="merge_ready"
+export SCRIPT_NAME="merge_ready"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 

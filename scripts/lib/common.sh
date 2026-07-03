@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # config/tunable variables defined here are consumed by the scripts that source this library
 # scripts/lib/common.sh
 #
 # Shared library for the agent-workflow scripts (start_work.sh, review_work.sh,
@@ -104,7 +105,7 @@ REVIEW_CHECK_CONTEXT="${AW_REVIEW_CHECK_CONTEXT:-aw/merge-gate}"
 # status label exists on an issue by construction (never by tracking
 # "the previous value").
 # ---------------------------------------------------------------------------
-ALL_STATUSES=(available claimed in-review changes-requested blocked done)
+ALL_STATUSES=(available claimed in-review changes-requested blocked "done")
 
 # ---------------------------------------------------------------------------
 # Structured logging
@@ -199,7 +200,8 @@ AW_LOCK_DIR=""
 
 acquire_instance_lock() {  # $1 = lock name (usually the script name)
   [ "${AW_SINGLE_INSTANCE:-0}" = "1" ] || return 0
-  local dir="${TMPDIR:-/tmp}/aw-lock-$1-$(printf '%s' "$REPO" | tr '/' '_')"
+  local dir
+  dir="${TMPDIR:-/tmp}/aw-lock-$1-$(printf '%s' "$REPO" | tr '/' '_')"
   if mkdir "$dir" 2>/dev/null; then
     AW_LOCK_DIR="$dir"
     return 0

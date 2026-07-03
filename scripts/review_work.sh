@@ -12,7 +12,7 @@
 #      AW_PR AW_MAX AW_POLL_SECONDS AW_REVIEW_CLAIM_TTL AW_FORCE AW_REPO REPO_DIR
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="review_work"
+export SCRIPT_NAME="review_work"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
@@ -56,7 +56,7 @@ else
   exit 1
 fi
 
-RUNS_AGENT=1
+export RUNS_AGENT=1
 preflight
 acquire_instance_lock "$SCRIPT_NAME"
 
@@ -126,7 +126,7 @@ set_check() {  # $1 sha $2 state $3 description
 # be the LAST non-empty line — quoted examples mid-text can't false-match.
 
 review_one() {  # $1 = PR number
-  local pr="$1" author sha logfile verdict body_file url
+  local pr="$1" author sha logfile verdict body_file
   author="$(gh pr view "$pr" --repo "$REPO" --json author --jq '.author.login')"
 
   if [ "$REVIEW_MODE" = "strict" ] && [ "$author" = "$ME" ]; then
@@ -238,7 +238,6 @@ review_one() {  # $1 = PR number
   fi
 
   body_file="$REVIEW_FILE"
-  url="${GITHUB_SERVER_URL:-https://github.com}/$REPO/actions"
 
   if [ "$verdict" = "PASS" ]; then
     gh pr review "$pr" --repo "$REPO" --approve --body-file "$body_file" >/dev/null 2>&1 || true

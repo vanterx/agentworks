@@ -13,7 +13,7 @@
 #   AW_DRY_RUN=1 ./scripts/reap.sh   # report only, no changes
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="reap"
+export SCRIPT_NAME="reap"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
@@ -21,9 +21,9 @@ preflight
 
 now_epoch() { date -u +%s; }
 age_secs() {  # $1 = ISO8601 timestamp
-  local ts="$1" then
-  then="$(date -u -d "$ts" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s)"
-  echo $(( $(now_epoch) - then ))
+  local ts="$1" then_epoch
+  then_epoch="$(date -u -d "$ts" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s)"
+  echo $(( $(now_epoch) - then_epoch ))
 }
 
 warn_if_capped() {  # $1 = json array, $2 = label being swept
