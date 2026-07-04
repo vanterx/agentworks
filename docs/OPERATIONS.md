@@ -2,7 +2,11 @@
 
 Production guidance for running this workflow at team/org scale. For
 first-time setup see [GETTING_STARTED.md](GETTING_STARTED.md); for the
-state machine itself see [AUTOMATION.md](AUTOMATION.md).
+state machine itself see [AUTOMATION.md](AUTOMATION.md); for how much of
+this can run with zero human involvement — and what each step costs you
+— see [AUTONOMY.md](AUTONOMY.md). Ready-made always-on deployments
+(systemd, Docker Compose, opt-in GitHub Actions cloud mode) live in
+`deploy/`.
 
 ## Deployment topologies
 
@@ -139,6 +143,7 @@ identities.
 | Review loop finds nothing but PRs are open | PRs are drafts, carry `review: human-only`, or already have a check at the head SHA | `gh pr list --json number,isDraft,labels`; use `AW_FORCE=1 AW_PR=<n>` to re-review one PR |
 | Merge gate stuck at "Quorum: N/M" | Fewer distinct trusted reviewer identities than the quorum | Add reviewer identities (each needs its own token) or lower `required_approvals`; `merge_ready.sh` shows who counted |
 | PASS recorded but nothing merged | `AW_AUTO_MERGE=0`, quorum pending, or branch protection blocks the bot | Check the commit-status description on the head SHA, then `AW_MERGE=1 ./scripts/merge_ready.sh` |
+| Issue says `done` but its PR is still open | The merge was rejected by branch protection (classic trigger: native "require approving reviews" + solo mode — commit-status approvals don't count) and, before v1.2.0's fix, the label was written anyway | Read the `aw-merge-blocked` comment on the PR; merge manually or fix protection per GETTING_STARTED step 4; `./scripts/reap.sh` relabels the issue to the truthful state |
 | "issue snapshot hit the 100-item cap" warnings | More than 100 open issues | Triage the backlog down (G0 is a queue valve, not a dumping ground); oldest issues are invisible until the queue shrinks |
 | Issues stuck in `changes-requested`, nobody picks them up | Rework capacity < review strictness; or the author identity is gone | Wait for `reap.sh` to unassign (REWORK_TTL), add a runner, or reassign manually |
 | Loop runs but every agent call fails instantly | Agent CLI not on PATH, expired agent subscription, or bad `AW_CLAUDE_PERMISSION_MODE` | `./scripts/doctor.sh`; check the runner log's first `[ERROR]` line |
@@ -226,3 +231,6 @@ environment > `aw.conf.local` > `aw.conf` > built-in default.
 | `AW_TRUST_WHITELIST` / `AW_REQUIRED_APPROVALS` | from trust config | Overrides for `merge_ready.sh` |
 | `AW_ALLOW_SOLO_REVIEW` | `0` | `1` = permit self-review (marked everywhere) |
 | `REVIEW_GITHUB_TOKEN` | — | Second identity's token for strict review |
+| `AW_AUTONOMY_FILE` | `.github/autonomy.json` | Owner-controlled autonomy toggles (see docs/AUTONOMY.md) |
+| `AW_TRIAGE_POLL_SECONDS` | `300` | Agent-triage loop idle poll |
+| `AW_PLAN_MAX_ISSUES` | `planner.max_issues_per_run` | Override planner per-run issue cap |

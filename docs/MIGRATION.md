@@ -3,6 +3,27 @@
 Upgrade notes for adopters tracking this template across releases. See
 [CHANGELOG.md](../CHANGELOG.md) for the full change list per version.
 
+## 1.1.0 → 1.2.0
+
+**Everything is additive and off by default** — upgrading changes no
+behavior until you edit `.github/autonomy.json`.
+
+- New files to copy: `.github/autonomy.json` (stub, all off),
+  `.github/workflows/triage.yml` (no-op while auto_triage disabled),
+  `prompts/triage.md`, `prompts/plan.md`, `GOALS.md` (stub),
+  `scripts/triage_work.sh`, `scripts/plan_work.sh`, `deploy/`,
+  `docs/AUTONOMY.md`, and optionally
+  `.github/workflows/agent-runner.yml.disabled`.
+- `dependency_gating` defaults ON: issues whose line-anchored
+  `Depends-on: #N` references are still open get skipped by the worker
+  loop (no label churn). If you used that exact phrase decoratively in
+  issue bodies, either mean it or disable the toggle.
+- Custom `prompts/review.md`: the governance-guard path list grew
+  (autonomy.json, GOALS.md, prompts/, aw.conf) — re-sync your copy.
+- One review-loop behavior refinement rides along: `rework` prompts now
+  include automation feedback (CI-failure / conflict marker comments)
+  when auto-resume posted any.
+
 ## 1.0.0 → 1.1.0
 
 **Breaking-ish (behavioral):**

@@ -6,6 +6,61 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-04
+
+### Added
+- **Owner-configurable autonomy** via `.github/autonomy.json` — one
+  committed switchboard (a governance surface) controlling every
+  autonomy feature; all off by default, fail-safe on missing/malformed
+  file. `doctor.sh` reports the effective autonomy level (L1–L4).
+  Reference: `docs/AUTONOMY.md` (the autonomy ladder).
+- **Auto-triage (L2)**: `triage.yml` auto-labels issues from
+  `trusted_authors` as `status: available` (zero model tokens, daily
+  cap); `scripts/triage_work.sh` agent-triages everyone else with a
+  fail-closed `TRIAGE: ACCEPT|DEFER|REJECT` last-line contract
+  (`prompts/triage.md`).
+- **Auto-resume (L3)**: CI-failed or merge-conflicted PRs are routed
+  back to the rework queue with dedup marker comments carrying the
+  failure context; rework prompts include that automation feedback.
+- **`Depends-on: #N` gating** (on by default): the worker loop skips
+  issues whose declared dependencies are still open; issue template
+  gained an optional field.
+- **Backlog planner (L4)**: `scripts/plan_work.sh` + `prompts/plan.md` +
+  `GOALS.md` — when the queue runs dry, an agent proposes new issues
+  from the goals file; the script (never the agent) files them, capped
+  per run. Refuses to run on a stub goals file.
+- **Always-on deployments**: `deploy/systemd/` units (worker, reviewer,
+  triage, planner timer), `deploy/docker/` (Dockerfile + Compose), and
+  opt-in cloud mode `.github/workflows/agent-runner.yml.disabled`
+  (bounded batches in Actions; trade-offs documented in the header).
+- Tests for `autonomy_setting` (incl. explicit-false handling),
+  `issue_dependencies`, `last_triage_line`, and `parse_plan_blocks`.
+
+### Fixed
+- **Blocked merges no longer mislabel issues or forge audit entries.**
+  `review_work.sh` and `merge_ready.sh` previously ran `gh pr merge ...
+  || true` and then unconditionally audited `merge/ok` and labeled the
+  linked issue `status: done` — even when branch protection rejected the
+  merge (classic trigger: a native required-approving-review rule that
+  commit-status approvals can't satisfy, i.e. solo mode). Both paths now
+  go through `merge_pr_verified()`, which trusts only the observed PR
+  state (`MERGED`): on success behavior is unchanged; on a blocked merge
+  the issue stays `in-review`, the audit records `merge/blocked` with
+  the rejection text, and one deduped `aw-merge-blocked` comment on the
+  PR explains what to fix.
+- New `reap.sh` sweep relabels already-inconsistent state: an OPEN issue
+  carrying `status: done` is routed back to `in-review` (open PR) or
+  `available` (no PR), healing trackers that the old bug left lying.
+
+### Changed
+- `render_template` verdict parsing generalized to `last_line_matching`
+  (shared by review and triage contracts).
+- Governance-guard path list in `prompts/review.md` now includes
+  `.github/autonomy.json` and `GOALS.md`.
+- README tagline, feature-section heading, and the GitHub repo
+  description now read "production-grade" (previous branding wording
+  removed everywhere).
+
 ## [1.1.0] - 2026-07-04
 
 ### Security

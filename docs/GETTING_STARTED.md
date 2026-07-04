@@ -66,9 +66,15 @@ applied automatically.)
 ## 4. Set up branch protection
 
 On your default branch, require the **`aw/merge-gate`** status check
-before merging. Do **not** rely on GitHub's native "require approving
-reviews" count — see `docs/AUTOMATION.md` for why `merge_ready.sh` exists
-and reads reviews independently of GitHub's own permission-gated count.
+before merging. Do **not** enable GitHub's native "require approving
+reviews" rule alongside it — that rule only counts formal reviews from
+write-access accounts, so in solo mode (and for any reviewer identity
+without write access) it will **actively block every merge the
+automation attempts**, even after the adversarial review passed. The
+loops detect a blocked merge, leave the issue truthfully `in-review`,
+and post an `aw-merge-blocked` comment on the PR — but nothing merges
+until you either drop the native rule or merge manually. See
+`docs/AUTOMATION.md` for why `merge_ready.sh` replaces the native count.
 
 ## 5. Configure review identity
 
@@ -117,3 +123,12 @@ every FAIL (and ideally every WARN) before running a loop.
   → review → merge loop, including one deliberately-broken example that
   exercises the rework path, before you point any of this at your real
   backlog.
+
+## 8. Choose your autonomy level (optional)
+
+Everything above runs at L1: humans triage every issue. When you're
+ready for less involvement — auto-triage, auto-resume on CI failures,
+or a fully self-driving backlog from `GOALS.md` — climb the ladder in
+[AUTONOMY.md](AUTONOMY.md), one `.github/autonomy.json` toggle at a
+time. Always-on runner deployments (systemd / Docker / opt-in cloud
+mode) live in `deploy/`.

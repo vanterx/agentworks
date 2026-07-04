@@ -39,9 +39,17 @@ decision.
 5. If a step fails, stop and report; don't improvise around the
    orchestration design.
 
-## Phase 0 — Ask me these questions first
+## Phase 0 — Prerequisites, then ask me these questions
 
-Before touching anything, ask me (one round of questions, don't drip):
+First verify the runtime requirements on this machine: `git`, `gh`
+(authenticated — check `gh auth status`), and `jq` must be on PATH, plus
+at least one agent CLI (`claude`, `codex`, or `hermes`). If anything is
+missing, tell me what and how to install it (e.g. `winget install
+jqlang.jq`, `apt install jq`, `brew install jq`) and stop until it's
+resolved — every orchestration script hard-fails without these.
+
+Then, before touching anything, ask me (one round of questions, don't
+drip):
 
 1. **Review identity mode** — do I have (or want to create) a second
    GitHub identity for adversarial review (`REVIEW_GITHUB_TOKEN`), or do

@@ -36,10 +36,25 @@ responsible for keeping intact:
    adversarial review meaningful. Solo mode (`AW_ALLOW_SOLO_REVIEW=1`)
    deliberately weakens this and marks every artifact it touches; treat it
    as a development convenience, never a production posture.
-5. **`scripts/` and `.github/workflows/` are governance surfaces.** The
-   review prompt routes changes to them to NEEDS_WORK by default, CI
-   validates them, and CODEOWNERS should force human review. Keep all
-   three layers.
+5. **`scripts/`, `.github/workflows/`, `prompts/`, `aw.conf`,
+   `.github/trusted-reviewers.json`, `.github/autonomy.json`, and
+   `GOALS.md` are governance surfaces.** The review prompt routes
+   changes to them to NEEDS_WORK by default, CI validates them, and
+   CODEOWNERS should force human review. Keep all three layers.
+
+## Auto-triage
+
+Enabling `auto_triage` in `.github/autonomy.json` weakens gate G0: issue
+text reaches agents without a human reading it first. The compensating
+controls are the `trusted_authors` allowlist (the zero-token CI tier
+only fires for logins you chose), the `max_auto_available_per_day`
+budget cap, and — for the agent tier — a fail-closed triage verdict that
+treats prompt-injection attempts as grounds for REJECT and never
+auto-accepts issues targeting governance surfaces. Even so: **never
+enable `agent_triage` on a public repo with open issue creation** unless
+you accept that any GitHub user can put text in front of your triage
+model. The adversarial review gate still stands between any triaged
+issue and a merge. See docs/AUTONOMY.md for the full trade-off ladder.
 
 ## Secrets handling
 

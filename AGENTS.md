@@ -42,7 +42,10 @@ stop — that's not your job.
 
 3. **Read the whole chain** — the issue, any parent/linked issues, and any
    prior PRs or review comments referencing it — before writing any code.
-   Avoid duplicating work that's already in flight.
+   Avoid duplicating work that's already in flight. If your issue should
+   wait for another one, say so with a line-anchored `Depends-on: #N` in
+   the issue body — the worker loop skips issues whose dependencies are
+   still open.
 
 4. **Do the work.** Stay in scope: fix what the issue asks for. If you spot
    something else worth fixing, note it in the PR description or open a new
