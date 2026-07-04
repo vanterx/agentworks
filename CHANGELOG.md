@@ -36,6 +36,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 - Tests for `autonomy_setting` (incl. explicit-false handling),
   `issue_dependencies`, `last_triage_line`, and `parse_plan_blocks`.
 
+### Fixed
+- **Blocked merges no longer mislabel issues or forge audit entries.**
+  `review_work.sh` and `merge_ready.sh` previously ran `gh pr merge ...
+  || true` and then unconditionally audited `merge/ok` and labeled the
+  linked issue `status: done` — even when branch protection rejected the
+  merge (classic trigger: a native required-approving-review rule that
+  commit-status approvals can't satisfy, i.e. solo mode). Both paths now
+  go through `merge_pr_verified()`, which trusts only the observed PR
+  state (`MERGED`): on success behavior is unchanged; on a blocked merge
+  the issue stays `in-review`, the audit records `merge/blocked` with
+  the rejection text, and one deduped `aw-merge-blocked` comment on the
+  PR explains what to fix.
+- New `reap.sh` sweep relabels already-inconsistent state: an OPEN issue
+  carrying `status: done` is routed back to `in-review` (open PR) or
+  `available` (no PR), healing trackers that the old bug left lying.
+
 ### Changed
 - `render_template` verdict parsing generalized to `last_line_matching`
   (shared by review and triage contracts).

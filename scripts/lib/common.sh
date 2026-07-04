@@ -584,6 +584,44 @@ automation_feedback() {  # $1 = PR number
 }
 
 # ---------------------------------------------------------------------------
+# merge_pr_verified — merge a PR and VERIFY it actually merged before
+# reporting success. Branch protection can reject a merge (e.g. a native
+# required-approving-review rule that commit-status approvals don't
+# satisfy, the classic solo-mode trigger); trusting the exit code — or
+# worse, swallowing it with `|| true` — once let callers label issues
+# "done" and audit "merge ok" for merges that never happened. The
+# observed PR state is the only truth consulted here.
+#
+# Returns 0 iff the PR is MERGED. On a blocked merge: audits "blocked",
+# posts one deduped explanatory PR comment per head SHA, returns 1 —
+# callers must leave issue labels untouched.
+# ---------------------------------------------------------------------------
+merge_pr_verified() {  # $1 = PR number
+  local pr="$1" sha errout state marker
+  sha="$(gh pr view "$pr" --repo "$REPO" --json headRefOid --jq '.headRefOid' 2>/dev/null)"
+  errout="$(gh pr merge "$pr" --repo "$REPO" --squash --delete-branch 2>&1 >/dev/null)" || true
+  state="$(gh pr view "$pr" --repo "$REPO" --json state --jq '.state' 2>/dev/null)"
+
+  if [ "$state" = "MERGED" ]; then
+    audit_event "merge" "pr#$pr" "ok" ""
+    return 0
+  fi
+
+  audit_event "merge" "pr#$pr" "blocked" "$(printf '%s' "$errout" | head -c 300)"
+  marker="<!-- aw-merge-blocked:$sha -->"
+  if ! gh pr view "$pr" --repo "$REPO" --json comments --jq '.comments[].body' 2>/dev/null | grep -qF "$marker"; then
+    gh pr comment "$pr" --repo "$REPO" --body "$marker
+🤖 Review passed, but the merge was **rejected** — most likely branch protection (e.g. a native \"require approving reviews\" rule, which commit-status approvals don't satisfy; see docs/AUTOMATION.md#why-merge_readysh-exists). A maintainer must merge manually or adjust protection to require only the \`$REVIEW_CHECK_CONTEXT\` check.
+
+\`\`\`
+$(printf '%s' "$errout" | head -c 500)
+\`\`\`" >/dev/null 2>&1 || true
+  fi
+  log_warn "PR #$pr merge blocked (state: ${state:-unknown}) — leaving issue state untouched; see PR comment"
+  return 1
+}
+
+# ---------------------------------------------------------------------------
 # parse_plan_blocks — extract "### ISSUE ... ### END" proposals from the
 # planner agent's output. Emits one record per well-formed block:
 # title and body separated by \x1f (unit sep), records terminated by \x1e

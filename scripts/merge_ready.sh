@@ -88,11 +88,13 @@ merge_pr() {  # $1 = PR number
   fi
   gh_retry gh api -X POST "repos/$OWNER/$NAME/statuses/$sha" \
     -f state=success -f context="$REVIEW_CHECK_CONTEXT" -f description="Trust model satisfied" >/dev/null 2>&1 || true
-  gh pr merge "$pr" --repo "$REPO" --squash --delete-branch >/dev/null 2>&1 || true
-  audit_event "merge" "pr#$pr" "ok" "trust model satisfied"
-  local iss; iss="$(issue_for_pr "$pr")"
-  [ -n "$iss" ] && set_status_label "$iss" "done"
-  log "merged PR #$pr"
+  if merge_pr_verified "$pr"; then
+    local iss; iss="$(issue_for_pr "$pr")"
+    [ -n "$iss" ] && set_status_label "$iss" "done"
+    log "merged PR #$pr"
+  else
+    log "PR #$pr: READY by trust model but merge was BLOCKED — see the aw-merge-blocked comment on the PR"
+  fi
 }
 
 main() {

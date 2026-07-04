@@ -265,10 +265,12 @@ review_one() {  # $1 = PR number
 
     set_check "$sha" success "$desc"
     if [ "$AUTO_MERGE" = "1" ]; then
-      gh pr merge "$pr" --repo "$REPO" --squash --delete-branch >/dev/null 2>&1 || true
-      audit_event "merge" "pr#$pr" "ok" "auto-merge after review pass"
-      local iss; iss="$(issue_for_pr "$pr")"
-      [ -n "$iss" ] && set_status_label "$iss" "done"
+      if merge_pr_verified "$pr"; then
+        local iss; iss="$(issue_for_pr "$pr")"
+        [ -n "$iss" ] && set_status_label "$iss" "done"
+      fi
+      # blocked merge: issue stays in-review, gate stays success —
+      # merge_pr_verified already audited and commented on the PR.
     fi
     log "PR #$pr -> PASS"
   else

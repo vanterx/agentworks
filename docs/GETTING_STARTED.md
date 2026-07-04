@@ -66,9 +66,15 @@ applied automatically.)
 ## 4. Set up branch protection
 
 On your default branch, require the **`aw/merge-gate`** status check
-before merging. Do **not** rely on GitHub's native "require approving
-reviews" count — see `docs/AUTOMATION.md` for why `merge_ready.sh` exists
-and reads reviews independently of GitHub's own permission-gated count.
+before merging. Do **not** enable GitHub's native "require approving
+reviews" rule alongside it — that rule only counts formal reviews from
+write-access accounts, so in solo mode (and for any reviewer identity
+without write access) it will **actively block every merge the
+automation attempts**, even after the adversarial review passed. The
+loops detect a blocked merge, leave the issue truthfully `in-review`,
+and post an `aw-merge-blocked` comment on the PR — but nothing merges
+until you either drop the native rule or merge manually. See
+`docs/AUTOMATION.md` for why `merge_ready.sh` replaces the native count.
 
 ## 5. Configure review identity
 
