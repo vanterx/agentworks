@@ -1,8 +1,9 @@
 # AgentWorks
 
-An enterprise-grade, drop-in orchestration layer for running autonomous
-AI coding agents against your GitHub repo — with humans staying in
-control of what gets worked on and what gets merged.
+A production-grade, drop-in orchestration layer for running autonomous
+AI coding agents against your GitHub repo — with owners deciding exactly
+how much runs on its own, from human-triaged queues to a fully
+self-driving backlog.
 
 > Agents grind. Humans steer.
 
@@ -29,7 +30,7 @@ can merge its own work unchecked.
       (state)                (engine)        (worker)      (sandbox)         (gate)
 ```
 
-## Enterprise features
+## Production features
 
 - **Audit trail** — every claim, status change, review verdict,
   merge-gate write, and merge is recorded as append-only JSONL
@@ -57,6 +58,14 @@ can merge its own work unchecked.
   distinct trusted reviewers approve.
 - **TDD enforcement** — `AW_ENFORCE_TDD=1` requires tests-first in the
   work prompt and makes missing tests a NEEDS_WORK criterion in review.
+- **Owner-configurable autonomy** — one committed file
+  (`.github/autonomy.json`) decides how much runs alone: auto-triage of
+  new issues, auto-resume on CI failures and merge conflicts,
+  `Depends-on: #N` gating, and an optional planner that generates the
+  backlog from `GOALS.md` when the queue runs dry. All off by default;
+  see [docs/AUTONOMY.md](docs/AUTONOMY.md).
+- **Always-on deployments** — systemd units and Docker Compose in
+  `deploy/`, plus an opt-in GitHub Actions cloud mode.
 - **Full dry-run** — `AW_DRY_RUN=1` (or `--dry-run`) on any script
   reports intended actions without invoking an agent or touching GitHub.
 - **CI for the engine itself** — shellcheck, syntax, YAML, and trust-config
@@ -92,6 +101,8 @@ gh auth login
 | `scripts/review_work.sh` | Adversarial reviewer loop: reviews open PRs, sets the `aw/merge-gate` status check |
 | `scripts/reap.sh` | Garbage collector: frees stale claims and reworks (cron-friendly, no model calls) |
 | `scripts/merge_ready.sh` | Evaluates a trust-model whitelist against recorded reviews and merges READY PRs |
+| `scripts/triage_work.sh` | Agent-triage loop for issues from non-trusted authors (autonomy L2) |
+| `scripts/plan_work.sh` | Backlog planner: files new issues from GOALS.md when the queue runs dry (autonomy L4) |
 | `scripts/doctor.sh` | Read-only deployment health check (labels, auth, branch protection, prompt templates) |
 | `scripts/render_prompt.sh` | Preview the exact prompt a loop would send for an issue/PR |
 | `scripts/metrics.sh` | Audit-trail stats (rework rate, cycle time) + live queue depths |
@@ -104,6 +115,9 @@ gh auth login
   working in this repo should follow.
 - [`docs/AUTOMATION.md`](docs/AUTOMATION.md) — the full status lifecycle,
   the reasoning behind `merge_ready.sh`, and solo-mode review.
+- [`docs/AUTONOMY.md`](docs/AUTONOMY.md) — the autonomy ladder: how much
+  runs without humans, what each level costs, and the owner-controlled
+  toggles.
 - [`docs/ADOPTION_PROMPT.md`](docs/ADOPTION_PROMPT.md) — paste-ready
   prompt that has your AI agent orchestrate the setup in your repo.
 - [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) — adopting this

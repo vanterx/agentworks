@@ -22,3 +22,5 @@ build/
 
 # operator-local config (may contain tokens) — aw.conf (team defaults) IS committed
 aw.conf.local
+aw.env
+aw.*.env

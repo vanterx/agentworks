@@ -38,6 +38,7 @@ GitHub Issues + Labels   →  scripts/*.sh          →  agent CLI            �
 - `scripts/review_work.sh` — adversarial review loop. Reviewer identity must differ from PR author (`REVIEW_GITHUB_TOKEN` swaps `GH_TOKEN`); solo self-review is an explicit opt-in (`AW_ALLOW_SOLO_REVIEW=1`) that stamps every artifact. Posts a plain commit status (`aw/merge-gate`) as the real merge gate. Supports N-reviewer quorum (gate stays `pending` until quorum).
 - `scripts/merge_ready.sh` — merges based on `.github/trusted-reviewers.json`, NOT GitHub's native review count (which only counts write-access reviewers). Its latest-review-per-login counting rule is mirrored by `count_trusted_approvals()` in common.sh — the two must never diverge.
 - `scripts/reap.sh` — cron GC for stale claims/reworks; no model calls; runs in CI on the ambient `GITHUB_TOKEN`.
+- `scripts/triage_work.sh` / `scripts/plan_work.sh` — the optional autonomy loops (agent triage of new issues; backlog generation from `GOALS.md` when the queue is dry). Both are gated by `.github/autonomy.json` — the owner-controlled autonomy switchboard (everything off by default, fail-safe on missing/malformed file via `autonomy_setting()`). `docs/AUTONOMY.md` is the reference.
 - `prompts/*.md` — all agent prompts, as `{{var}}` template files. Behavior tuning happens here, not in scripts. Rendering (`render_template()`) is two-phase via random sentinels so untrusted values containing `{{...}}` can never be expanded — keep it that way.
 - `.aw/` (gitignored) — runtime state: append-only `audit.jsonl`, heartbeat files.
 
@@ -51,7 +52,7 @@ GitHub Issues + Labels   →  scripts/*.sh          →  agent CLI            �
 
 ## Conventions for changes
 
-- `scripts/`, `.github/workflows/`, `prompts/`, `aw.conf`, and `.github/trusted-reviewers.json` are **governance surfaces** — the review prompt routes unframed changes to them to NEEDS_WORK, and CONTRIBUTING.md requires framing such PRs as proposals.
+- `scripts/`, `.github/workflows/`, `prompts/`, `aw.conf`, `.github/trusted-reviewers.json`, `.github/autonomy.json`, and `GOALS.md` are **governance surfaces** — the review prompt routes unframed changes to them to NEEDS_WORK, and CONTRIBUTING.md requires framing such PRs as proposals.
 - New env vars: `AW_` prefix, default in `scripts/lib/common.sh`, a row in the table in `docs/OPERATIONS.md`, and a commented line in `aw.conf`.
 - New template placeholders: also add them to `TEMPLATE_VARS` in `scripts/doctor.sh` (it warns on unknown placeholders).
 - Mutating `gh` calls must be idempotent, `gh_retry`-wrapped, or explicitly best-effort (`|| true`).

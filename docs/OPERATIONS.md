@@ -2,7 +2,11 @@
 
 Production guidance for running this workflow at team/org scale. For
 first-time setup see [GETTING_STARTED.md](GETTING_STARTED.md); for the
-state machine itself see [AUTOMATION.md](AUTOMATION.md).
+state machine itself see [AUTOMATION.md](AUTOMATION.md); for how much of
+this can run with zero human involvement — and what each step costs you
+— see [AUTONOMY.md](AUTONOMY.md). Ready-made always-on deployments
+(systemd, Docker Compose, opt-in GitHub Actions cloud mode) live in
+`deploy/`.
 
 ## Deployment topologies
 
@@ -226,3 +230,6 @@ environment > `aw.conf.local` > `aw.conf` > built-in default.
 | `AW_TRUST_WHITELIST` / `AW_REQUIRED_APPROVALS` | from trust config | Overrides for `merge_ready.sh` |
 | `AW_ALLOW_SOLO_REVIEW` | `0` | `1` = permit self-review (marked everywhere) |
 | `REVIEW_GITHUB_TOKEN` | — | Second identity's token for strict review |
+| `AW_AUTONOMY_FILE` | `.github/autonomy.json` | Owner-controlled autonomy toggles (see docs/AUTONOMY.md) |
+| `AW_TRIAGE_POLL_SECONDS` | `300` | Agent-triage loop idle poll |
+| `AW_PLAN_MAX_ISSUES` | `planner.max_issues_per_run` | Override planner per-run issue cap |

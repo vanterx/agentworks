@@ -117,3 +117,12 @@ every FAIL (and ideally every WARN) before running a loop.
   → review → merge loop, including one deliberately-broken example that
   exercises the rework path, before you point any of this at your real
   backlog.
+
+## 8. Choose your autonomy level (optional)
+
+Everything above runs at L1: humans triage every issue. When you're
+ready for less involvement — auto-triage, auto-resume on CI failures,
+or a fully self-driving backlog from `GOALS.md` — climb the ladder in
+[AUTONOMY.md](AUTONOMY.md), one `.github/autonomy.json` toggle at a
+time. Always-on runner deployments (systemd / Docker / opt-in cloud
+mode) live in `deploy/`.
