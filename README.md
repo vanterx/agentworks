@@ -76,6 +76,10 @@ can merge its own work unchecked.
 
 ## Quickstart
 
+**Requirements:** `git`, [`gh`](https://cli.github.com/) (authenticated),
+[`jq`](https://jqlang.org/), and at least one agent CLI (`claude`,
+`codex`, or `hermes`). Nothing else — no Python, no Node runtime deps.
+
 This is a template. The fastest way to adopt it: paste
 [`docs/ADOPTION_PROMPT.md`](docs/ADOPTION_PROMPT.md) into your AI coding
 agent inside your own repo and let it orchestrate the whole setup —
