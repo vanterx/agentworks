@@ -28,6 +28,42 @@ missing/malformed file fails safe to everything-off.
 | **L3 — auto-resume** | + CI failures and merge conflicts route themselves back to rework; issues wait for their `Depends-on:` dependencies | Write issues | `auto_resume.ci_failures=true`, `auto_resume.merge_conflicts=true` (`dependency_gating` is already on) |
 | **L4 — self-driving backlog** | + when the queue runs dry, the planner proposes new issues from `GOALS.md` | Maintain `GOALS.md`, trust config, and incident response — that's it | `planner.enabled=true` + a real `GOALS.md` + `plan_work.sh` on a timer |
 
+## Toggling on and off
+
+Every feature is an **independent switch** — nothing is bundled. Run
+auto-resume without auto-triage, dependency gating alone, or even split
+`auto_resume.ci_failures` from `auto_resume.merge_conflicts`. Flip them
+in any order, at any time.
+
+**How a change takes effect:**
+
+- Scripts read the file fresh on every check (`autonomy_setting()` has
+  no cache), so no loop restart is needed — but they read the **runner's
+  local clone**. A toggle committed on GitHub reaches a self-hosted
+  runner only after that clone pulls. The CI tier (`triage.yml`) checks
+  out fresh on every issue event, so it reacts to the committed file
+  immediately.
+- Per-runner override without touching the repo: point
+  `AW_AUTONOMY_FILE` at a machine-local variant — e.g. keep one runner
+  conservative while others run hotter.
+
+**Toggling down is always safe.** Turning a feature off mid-flight
+strands nothing: auto-triage just stops labeling, auto-resume stops
+sweeping, the planner stops proposing. Issues already claimed or in
+review continue through the base L1 loop, which these toggles don't
+govern.
+
+**Brakes that act faster than any toggle**, independent of this file:
+the `do-not-automate` label pulls a single issue out of every queue
+instantly, `review: human-only` does the same for a PR, and stopping
+the systemd/Docker service halts a runner outright.
+
+After any change, run `./scripts/doctor.sh` — it prints the effective
+level (L1–L4) and every toggle's state, so you verify what you actually
+enabled rather than what you meant to. And because the file is a
+governance surface, an agent-authored PR can't quietly grant itself
+more autonomy: the adversarial reviewer flags any diff touching it.
+
 ## What each rung costs you (read before climbing)
 
 **L2 weakens gate G0.** G0 (a human labeling each issue) is the
